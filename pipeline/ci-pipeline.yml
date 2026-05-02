@@ -1,0 +1,41 @@
+# Pipeline CI para TaskSist
+# Se ejecuta automáticamente en cada push a main
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  # Paso 1: Instalar .NET SDK
+  - task: UseDotNet@2
+    displayName: 'Instalar .NET SDK'
+    inputs:
+      version: '8.0.x'
+
+  # Paso 2: Restaurar paquetes
+  - task: DotNetCoreCLI@2
+    displayName: 'Restaurar paquetes'
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+
+  # Paso 3: Compilar el proyecto
+  - task: DotNetCoreCLI@2
+    displayName: 'Compilar proyecto'
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
+      arguments: '--configuration Release'
+
+  # Paso 4: Ejecutar pruebas (si hay)
+  - task: DotNetCoreCLI@2
+    displayName: 'Ejecutar pruebas'
+    inputs:
+      command: 'test'
+      projects: '**/*Tests.csproj'
+      arguments: '--configuration Release'
+    continueOnError: true
